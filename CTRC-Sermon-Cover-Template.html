@@ -183,13 +183,24 @@
       const preacherGrid = document.getElementById('preacher-grid');
       let selectedTile = null;
 
+      const useUnknownImage = (image) => {
+        image.onerror = null;
+        image.src = 'Preachers/Unknown.png';
+      };
+
+      portrait.addEventListener('error', () => useUnknownImage(portrait));
+
       const addOption = (name) => {
         const imagePath = `Preachers/${name}.png`;
 
         const tile = document.createElement('button');
         tile.type = 'button';
         tile.className = 'preacher-option';
-        tile.innerHTML = `<img src="${imagePath}" alt=""><span>${name}</span>`;
+        const image = document.createElement('img');
+        image.src = imagePath;
+        image.alt = '';
+        image.addEventListener('error', () => useUnknownImage(image), { once: true });
+        tile.append(image, Object.assign(document.createElement('span'), { textContent: name }));
         tile.addEventListener('click', () => {
           preacher.textContent = name;
           portrait.src = imagePath;
