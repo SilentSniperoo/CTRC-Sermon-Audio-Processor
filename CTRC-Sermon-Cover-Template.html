@@ -11,10 +11,12 @@
         font-family: "DM Serif Display", serif;
       }
 
-      html, body {
+      html, body, form {
+        width: 1vw;
+        height: 1vh;
         min-height: 100%;
         display: grid;
-        place-items: center;
+        place-items: start;
       }
 
       #background {
@@ -24,6 +26,8 @@
         overflow: hidden;
         background: #2b633b;
         box-shadow: 15px 25px 55px 5px rgba(0, 0, 0, 1);
+        transform-origin: top left;
+        scale: 50%;
       }
 
       #portrait {
@@ -32,7 +36,6 @@
         top: 50px;
         width: 460px;
         height: 675px;
-        overflow: hidden;
         border-bottom-right-radius: 100px;
       }
 
@@ -42,7 +45,6 @@
         top: 20px;
         width: 750px;
         height: auto;
-        overflow: hidden;
       }
 
       #textbox {
@@ -51,14 +53,30 @@
         top: 310px;
         width: 710px;
         height: auto;
-        overflow: hidden;
       }
 
       p {
+        text-anchor: start;
         color: white;
         text-transform: uppercase;
         font-size: 45pt;
         line-height: 93%;
+        background: transparent;
+        outline: none;
+        width: 100%;
+        height: auto;
+        overflow: visible;
+      }
+
+      .interactive:focus,
+      .interactive:hover {
+        outline: 1px solid #fff4;
+        background: #fff1;
+      }
+
+      .interactive:empty:before {
+        content: attr(data-placeholder);
+        color: #fffb;
       }
 
       #preacher {
@@ -78,21 +96,67 @@
     </style>
   </head>
   <body>
-    <div id="background">
-      <img id="portrait" src="Preachers/Joshua Dockter.png"/>
-      <img id="logo" src="CTRC-Logo-1200x400.png"/>
-      <div id="textbox">
-        <p id="sermon">
-          Sermon title, auto-breaking as necessary
-        </p>
-        <p id="passage">
-          1 Hezekiah 23:45-67:89
-        </p>
-        <p id="preacher">
-          Joshua Dockter
-        </p>
+    <form>
+      <label for="wav">Select .wav file</label>
+      <input id="wav" type="file" accept=".wav" onchange="document.getElementById('in').src"/>
+      <audio hidden="true" id="in" controls src=""></audio>
+      <hr>
+      <label for="zoom">Preview Zoom (does not affect export)</label>
+      <input id="zoom" type="range" min="50" max="150" value="100" step="1" oninput="document.getElementById('background').style.transform = 'scale(' + (this.value / 100) + ')'" />
+      <br>
+      <div id="background">
+        <img id="portrait" src="Preachers/Spiderman.png" onclick="selectPreacher()"/>
+        <img id="logo" src="CTRC-Logo-1200x400.png"/>
+        <div id="gradient"></div>
+        <div id="textbox">
+          <p id="sermon" class="interactive" contenteditable="true" spellcheck="false" data-placeholder="Sermon title, auto-breaking as necessary"></p>
+          <p id="passage" class="interactive" contenteditable="true" spellcheck="false" data-placeholder="1 Hezekiah 23:45-67:89"></p>
+          <p id="preacher" class="interactive" onclick="alert('click!')">Spiderman</p>
+        </div>
       </div>
-      <div id="gradient"></div>
-    </div>
+      <dialog id="select-preacher" closedby="any">
+        <label for="preacher-directory">Portrait Selection</label>
+        <select id="preacher-list"></select>
+      </dialog>
+    </form>
+    <output hidden="true">
+      <audio id="out" controls src=""></audio>
+    </output>
+    <script>
+      const dialog = document.getElementById('select-preacher')
+      const portrait = document.getElementById('portrait');
+      const preacherList = document.getElementById('preacher-list');
+
+      const addOption = (name) => {
+        const imagePath = `Preachers/${name}.png`;
+        const option = document.createElement('option');
+        option.value = imagePath;
+        option.textContent = name;
+        preacherList.append(option);
+        return option;
+      };
+
+      var placeholder = addOption('Spiderman');
+      [
+        'Joshua Dockter', // TODO: Replace with dynamic insertion of images
+        'Joshua Dockter2',
+        'Joshua Dockter3',
+      ].forEach(addOption);
+
+      portrait.src = preacherList.value;
+
+      function selectPreacher() {
+        if (placeholder) {
+          preacherList.removeChild(placeholder);
+          placeholder = null;
+          portrait.src = "";
+        }
+        dialog.showModal();
+      }
+
+      preacherList.addEventListener('change', () => {
+        portrait.src = preacherList.value;
+      });
+    </script>
   </body>
 </html>
